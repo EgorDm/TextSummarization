@@ -1,3 +1,5 @@
+meta_chars = ["<UNK>", "<PAD>", "<EOS>", "<GO>"]
+
 contractions = {
     "ain't": "am not",
     "aren't": "are not",
