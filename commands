@@ -1,0 +1,1 @@
+floyd run --env tensorflow --data egordm/datasets/news-summary-keggle/1:news-summary-keggle --data egordm/datasets/numberbatch-en-1706/1:numberbatch-en-1706 "mkdir -p data && ln -s /news-summary-keggle data/news-summary-keggle && ln -s /numberbatch-en-1706 data/numberbatch-en-1706 && python main.py"
