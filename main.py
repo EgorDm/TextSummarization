@@ -1,30 +1,42 @@
-import time
 import datasets.NewsSummaryDataset as ds
 from batchers.Batcher import Batcher
 import tensorflow as tf
 from tqdm import tqdm, trange
 from models.Seq2SeqModel import Seq2SeqModel
+import numpy as np
+import os
+from utils.log_utils import log_sample
 
-batch_size = 16
+model_name = 'testboi'
+
+batch_size = 6
 cell_size = 256
 num_layers = 2
-learning_rate = 0.005
 keep_probability = 0.75
+learning_rate = 0.005
+decay_rate = 0.90
+decay_step = 600
+
+display_step = 100
+display_sample = 400
+save_freq = 1000
+
+save_path = 'saves/{}'.format(model_name)
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
 
 inputs, targets = ds.get_data()
-batcher = Batcher(inputs, targets, batch_size)
+batcher = Batcher(inputs, targets, batch_size, save_path)
+batcher.save_data(save_path)
 model = Seq2SeqModel(batcher, cell_size, num_layers)
 
-learning_rate_decay = 0.95
-min_learning_rate = 0.0005
-display_step = 10
-pad = batcher.vocab_id["<PAD>"]
-
+decayed_learning_rate = learning_rate
 step = 0
 
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
+saver = tf.train.Saver()
 
 while True:
     t = trange(display_step)
@@ -33,34 +45,31 @@ while True:
         feed_dict = {
             model.inputs: inputs,
             model.targets: targets,
-            model.lr: learning_rate,
+            model.lr: decayed_learning_rate,
             model.in_length: input_lengths,
             model.out_length: target_lengths,
             model.keep_prob: keep_probability
         }
         _, loss = sess.run([model.optimizer, model.loss], feed_dict)
 
-        t.set_postfix(step=step, loss=loss)
+        t.set_postfix(step=step, loss=loss, lr=decayed_learning_rate, cursor=batcher.cursor)
         step += 1
 
-    if step % (display_step * 3):
+    if step % display_sample == 0:
         inputs, targets, input_lengths, target_lengths = batcher.get_batch()
+        text = inputs[0]
         feed_dict = {
-            model.inputs: inputs,
-            model.targets: targets,
+            model.inputs: [text] * batch_size,
+            model.in_length: [len(text)] * batch_size,
+            model.out_length: [np.random.randint(30, 50)],
             model.lr: 0,
-            model.in_length: input_lengths,
-            model.out_length: target_lengths,
             model.keep_prob: 1
         }
         logits = sess.run([model.inference_logits], feed_dict)
+        log_sample(text, logits[0][0], batcher.vocab_id)
 
-        print('\nText')
-        print('  Word Ids:    {}'.format([i for i in inputs]))
-        print('  Input Words: {}'.format(" ".join([batcher.id_vocab[i] for i in inputs])))
+    if step % save_freq == 0:
+        save_path = saver.save(sess, '{}/{}.ckpt'.format(save_path, model_name))
+        print('Saved checkpoint to {}'.format(save_path))
 
-        print('\nSummary')
-        print('  Word Ids:       {}'.format([i for i in logits if i != pad]))
-        print('  Response Words: {}'.format(" ".join([batcher.id_vocab[i] for i in logits if i != pad])))
-
-
+    decayed_learning_rate = learning_rate * pow(decay_rate, (step / decay_rate))
