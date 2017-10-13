@@ -7,6 +7,7 @@ from models.Seq2SeqModel import Seq2SeqModel
 from utils.log_utils import log_sample
 
 model_name = 'testboi'
+load_step = 10
 
 # TODO: save || const
 batch_size = 6
@@ -25,7 +26,7 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 saver = tf.train.Saver()
-saver.restore(sess, '{}/{}.ckpt'.format(save_path, model_name))
+saver.restore(sess, '{}/checkpoints/{}.ckpt-{}'.format(save_path, model_name, load_step))
 
 # saver = tf.train.import_meta_graph('{}/{}.ckpt.meta'.format(save_path, model_name))
 # saver.restore(sess, tf.train.latest_checkpoint(save_path))

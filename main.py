@@ -22,8 +22,8 @@ display_sample = 400
 save_freq = display_step * 6
 
 save_path = 'saves/{}'.format(model_name)
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
+os.makedirs(save_path, exist_ok=True)
+os.makedirs('{}/checkpoints'.format(save_path), exist_ok=True)
 
 inputs, targets = ds.get_data() #TODO: move to batcher a fn
 batcher = Batcher(inputs, targets, batch_size, save_path)
@@ -68,7 +68,7 @@ while True:
         log_sample(text, logits[0][0], batcher.vocab_id, batcher.id_vocab)
 
     if step % save_freq == 0:
-        save_path = saver.save(sess, '{}/{}.ckpt'.format(save_path, model_name), global_step=step)
+        save_path = saver.save(sess, '{}/checkpoints/{}.ckpt'.format(save_path, model_name), global_step=step)
         print('Saved checkpoint to {}'.format(save_path))
 
     decayed_learning_rate = learning_rate * pow(decay_rate, (step / decay_rate))
