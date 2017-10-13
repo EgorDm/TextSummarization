@@ -4,7 +4,7 @@ from datasets.text_utils import clean_text
 
 
 def get_data():
-    df = pd.read_csv("data/news_summary.csv", encoding="latin1")
+    df = pd.read_csv("data/news-summary-keggle/news_summary.csv", encoding="latin1")
     df.drop_duplicates(subset=["ctext"], inplace=True)
     df.dropna(inplace=True)
     df.drop(['author', 'date', 'headlines', 'read_more'], 1, inplace=True)

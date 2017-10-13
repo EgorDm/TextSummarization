@@ -8,7 +8,7 @@ def get_embeddings():
     if _embeddings is not None: return _embeddings
 
     _embeddings = {}
-    with open('data/numberbatch-en-17.06.txt', encoding='utf-8') as f:
+    with open('data/numberbatch-en-1706/numberbatch-en-17.06.txt', encoding='utf-8') as f:
         for line in f:
             values = line.split(' ')
             word = values[0]

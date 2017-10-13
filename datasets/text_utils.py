@@ -1,7 +1,9 @@
 import re
 import pandas as pd
 from datasets.constants import contractions, meta_chars
-from nltk.corpus import stopwords
+import nltk
+from nltk import corpus
+nltk.download('stopwords')
 
 
 def clean_text(text, remove_stopwords=True):
@@ -29,7 +31,7 @@ def clean_text(text, remove_stopwords=True):
 
     if remove_stopwords:
         text = text.split()
-        stops = set(stopwords.words("english"))
+        stops = set(corpus.stopwords.words("english"))
         text = [w for w in text if not w in stops]
         text = " ".join(text)
 
