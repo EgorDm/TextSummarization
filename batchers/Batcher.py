@@ -24,6 +24,7 @@ class Batcher:
 
         self._create_embeddings(inputs, targets)
         self._process_data(inputs, targets)
+        self.save_data(path)
 
     def _create_embeddings(self, inputs, targets):
         word_counts = {}
@@ -101,6 +102,7 @@ class Batcher:
     def load_data(self, path):
         self.embeddings = load_data('{}/embeddings.txt'.format(path))
         self.vocab_id = load_data('{}/vocabulary.txt'.format(path))
+        self.id_vocab = inverse_dictionary(self.vocab_id)
         self.inputs, self.targets = load_data('{}/data.txt'.format(path))
         print("Vocabulary size:", len(self.vocab_id))
         print("Embedding size:", len(self.embeddings))
