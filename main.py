@@ -14,8 +14,8 @@ cell_size = 256
 num_layers = 2
 keep_probability = 0.75
 learning_rate = 0.005
-decay_rate = 0.90
-decay_step = 600
+decay_rate = 0.95
+decay_step = 400
 
 display_step = 100
 display_sample = 400
@@ -44,14 +44,14 @@ while True:
         feed_dict = {
             model.inputs: inputs,
             model.targets: targets,
-            model.lr: decayed_learning_rate,
+            model.lr: learning_rate,
             model.in_length: input_lengths,
             model.out_length: target_lengths,
             model.keep_prob: keep_probability
         }
         _, loss = sess.run([model.optimizer, model.loss], feed_dict)
 
-        t.set_postfix(step=step, loss=loss, lr=decayed_learning_rate, cursor=batcher.cursor)
+        t.set_postfix(step=step, loss=loss, lr=learning_rate, cursor=batcher.cursor)
         step += 1
 
     if step % display_sample == 0:
@@ -68,7 +68,8 @@ while True:
         log_sample(text, logits[0][0], batcher.vocab_id, batcher.id_vocab)
 
     if step % save_freq == 0:
-        save_path = saver.save(sess, '{}/checkpoints/{}.ckpt'.format(save_path, model_name), global_step=step)
-        print('Saved checkpoint to {}'.format(save_path))
+        save_path_tmp = saver.save(sess, '{}/checkpoints/{}.ckpt'.format(save_path, model_name), global_step=step)
+        print('Saved checkpoint to {}'.format(save_path_tmp))
 
-    decayed_learning_rate = learning_rate * pow(decay_rate, (step / decay_rate))
+    if learning_rate > 0.000005:
+        learning_rate *= decay_rate
