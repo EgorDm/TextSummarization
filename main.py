@@ -19,15 +19,14 @@ decay_step = 600
 
 display_step = 100
 display_sample = 400
-save_freq = 1000
+save_freq = display_step * 6
 
 save_path = 'saves/{}'.format(model_name)
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
-inputs, targets = ds.get_data()
+inputs, targets = ds.get_data() #TODO: move to batcher a fn
 batcher = Batcher(inputs, targets, batch_size, save_path)
-batcher.save_data(save_path)
 model = Seq2SeqModel(batcher, cell_size, num_layers)
 
 decayed_learning_rate = learning_rate
@@ -66,10 +65,10 @@ while True:
             model.keep_prob: 1
         }
         logits = sess.run([model.inference_logits], feed_dict)
-        log_sample(text, logits[0][0], batcher.vocab_id)
+        log_sample(text, logits[0][0], batcher.vocab_id, batcher.id_vocab)
 
     if step % save_freq == 0:
-        save_path = saver.save(sess, '{}/{}.ckpt'.format(save_path, model_name))
+        save_path = saver.save(sess, '{}/{}.ckpt'.format(save_path, model_name), global_step=step)
         print('Saved checkpoint to {}'.format(save_path))
 
     decayed_learning_rate = learning_rate * pow(decay_rate, (step / decay_rate))
