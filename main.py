@@ -2,6 +2,8 @@ import datasets.NewsSummaryDataset as ds
 from batchers.Batcher import Batcher
 import tensorflow as tf
 from tqdm import tqdm, trange
+
+from models.GRUSeq2SeqModel import GRUSeq2SeqModel
 from models.Seq2SeqModel import Seq2SeqModel
 import numpy as np
 import os
@@ -27,7 +29,7 @@ os.makedirs('{}/checkpoints'.format(save_path), exist_ok=True)
 
 inputs, targets = ds.get_data() #TODO: move to batcher a fn
 batcher = Batcher(inputs, targets, batch_size, save_path)
-model = Seq2SeqModel(batcher, cell_size, num_layers)
+model = GRUSeq2SeqModel(batcher, cell_size, num_layers)
 
 decayed_learning_rate = learning_rate
 step = 0
